@@ -244,7 +244,7 @@ void ManipulationTransceiver::transceiverRArmNavigation(const geometry_msgs::Twi
     r_ps_msg.pose.position.z = gripper_pos_z;
 
 
-//TODOtoca hacer los 4 cuadrantes..... --,+-,++,-+, con dX y dY
+//TODO test with atan2, not to do all 4...
     if(sphere_dY < 0.f){
         gripper_roll = atan( (target_pos_z - gripper_pos_z) / (- target_pos_y + gripper_pos_y ) );
         gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;

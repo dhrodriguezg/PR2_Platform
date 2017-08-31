@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+      <name>ground_plane</name>
+      <pose>0.0 0.0 -0.001 0.0 0.0 0.0</pose>
+    </include>
+
+    <include>
+      <uri>model://custom_scenario_03</uri>
+      <name>scenario_03</name>
+    </include>
+
+    <include>
+      <uri>model://custom_mario_box</uri>
+      <pose>-2.3487 3.3418 0.753 0 0 -1.570796327</pose>
+    </include>
+
+    <!-- A camera -->
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>7.23602 -2.30855 5.71687 3.18319e-17 0.511643 2.21619</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+
+
+  </world>
+</sdf>

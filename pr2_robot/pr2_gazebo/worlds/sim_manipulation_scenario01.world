@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+      <name>ground_plane</name>
+      <pose>0.0 0.0 -0.001 0.0 0.0 0.0</pose>
+    </include>
+
+    <include>
+      <uri>model://custom_scenario_01</uri>
+      <name>scenario_01</name>
+      <pose>1.24475 -2.3498 0 0 0 0.7655</pose>
+    </include>
+
+    <include>
+      <uri>model://custom_basket</uri>
+      <pose>0.65823 0.092414 0.6 0.0 0.0 3.057</pose>
+    </include>
+
+    <model name="sphere">
+      <static>true</static>
+      <!-- pose>0.650141 0.092925 0.632065 0 0 0</pose -->
+      <pose>0.659448 0.097548 0.632065 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.75</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.10</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- A camera -->
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>14.9225 11.7673 11.3529 -3.71688e-17 0.727643 -2.53899</pose>
+        <view_controller>orbit</view_controller>
+      </camera>
+    </gui>
+
+
+
+  </world>
+</sdf>

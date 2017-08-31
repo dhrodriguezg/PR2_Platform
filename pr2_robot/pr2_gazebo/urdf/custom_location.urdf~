@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<robot name="location_labyrinth">
+
+  <link name="brick01">
+    <inertial>
+      <origin xyz="0.0 1.0 0.0" /> 
+      <mass value="1" />
+      <inertia 
+        ixx="1.0"  ixy="0.0"  ixz="0.0"
+        iyy="1.0"  iyz="0.0"
+        izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="0.0 0.75 0.0"/>
+      <geometry>
+        <box size="0.25 1.5 0.25"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.75 0.0"/>
+      <geometry>
+        <box size="0.25 1.5 0.25"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="brick01">
+    <material>Gazebo/Green</material>
+  </gazebo>
+</robot>
+
+
+

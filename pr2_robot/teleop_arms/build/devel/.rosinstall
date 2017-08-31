@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/dhrodriguezg/catkin_ws/src/teleop_arms/build/devel/setup.sh

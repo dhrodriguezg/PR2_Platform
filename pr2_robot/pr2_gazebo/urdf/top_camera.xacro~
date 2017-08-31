@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<!-- 
+This is the xacro description of a Pioneer 3DX, to be used in rviz and gazebo.
+Copyright (C) 2013 Rafael Berkvens rafael.berkvens@uantwerpen.be
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+This project is based on work by Tracy Davies, where it was in turn based on
+work original in ucs-ros-pkg.
+ -->
+
+<robot name="top_camera" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Constants for robot dimensions -->
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="cameraSize" value="0.1"/>
+  <xacro:property name="cameraMass" value="0.1"/>
+
+  <xacro:include filename="$(find pr2_gazebo)/urdf/top_camera.gazebo" />
+
+  <!-- chassis -->
+	<link name="base_link">
+		<inertial>
+			<mass value="1.0" />
+			<origin xyz="-0.05 0 0" />
+			<inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1" />
+		</inertial>
+	</link>
+
+  <!-- camera PTZ -->
+	<link name="cameraptz">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${cameraSize} ${cameraSize} ${cameraSize}"/>
+			</geometry>
+		</collision>
+
+		<visual>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${cameraSize} ${cameraSize} ${cameraSize}"/>
+			</geometry>
+			<material name="white"/>
+		</visual>
+
+		<inertial>
+			<mass value="${cameraMass}" />
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<box_inertia m="${cameraMass}" x="${cameraSize}" y="${cameraSize}" z="${cameraSize}" />
+			<inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+		</inertial>
+	</link>
+
+	<joint name="cameraptz_joint" type="fixed">
+		<axis xyz="0 1 0" />
+		<origin xyz="-0.05 0 ${cameraSize/2}" rpy="0 0 0"/>
+		<parent link="base_link"/>
+		<child link="cameraptz"/>
+	</joint>
+
+	<link name="cameraptz_ref">
+	</link>
+
+	<!-- generate an optical frame http://www.ros.org/reps/rep-0103.html#suffix-frames
+	    so that ros and opencv can operate on the camera frame correctly -->
+	<joint name="cameraptz_ref_joint" type="fixed">
+	  <!-- these values have to be these values otherwise the gazebo camera image
+	      won't be aligned properly with the frame it is supposedly originating from -->
+	  <origin xyz="0 0 0" rpy="${-PI/2} 0 ${-PI/2}"/>
+	  <parent link="cameraptz"/>
+	  <child link="cameraptz_ref"/>
+	</joint>
+
+</robot>

@@ -5,6 +5,7 @@
     <!-- A global light source -->
     <include>
       <uri>model://sun</uri>
+      <pose>0.0 -2 2 0.0 0.0 0.0</pose>
     </include>
 
     <!-- A ground plane -->
@@ -17,7 +18,12 @@
     <include>
       <uri>model://custom_scenario_02</uri>
       <name>scenario_02</name>
-      <pose>-0.96 0.2642 0.0 0.0 0.0 3.141592654</pose>
+      <pose>4 -1 0 0 0 -1.570796327</pose>
+    </include>
+
+    <include>
+      <uri>model://custom_mystery_gift</uri>
+      <pose>4 -0.636 0.7475 0 0 3.1416</pose>
     </include>
 
     <!-- A camera -->

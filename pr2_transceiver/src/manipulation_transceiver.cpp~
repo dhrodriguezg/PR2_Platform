@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+#include <boost/filesystem.hpp>
 #include <math.h>
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
@@ -60,6 +63,9 @@ class ManipulationTransceiver {
     ros::Subscriber android_r_arm_grasp_sub;
     ros::Subscriber robot_odometry_sub;
     ros::Subscriber interface_number_sub;
+    ros::Subscriber user_measures_sub;
+    ros::Subscriber scenario_number_sub;
+
     //Messages
     pr2_controllers_msgs::Pr2GripperCommand gripper_msg;
     geometry_msgs::PoseStamped r_ps_msg;
@@ -87,12 +93,15 @@ class ManipulationTransceiver {
     float target_pos_y;
     float target_pos_z;
     float target_radius;
-    float depth_ang;
-    float height_ang;
     float sphere_dX;
     float sphere_dY;
+    float sphere_dZ;
 
     int interface_number;
+    int scenario_number;
+    float user_number;
+    float user_interface;
+    float user_time;
 
     //udp socket
     bool udpReady;                  /* # bytes received */
@@ -114,6 +123,9 @@ class ManipulationTransceiver {
     void transceiverGripperPose(const std_msgs::Int32::ConstPtr& msg);
     void robotOdometry(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
     void interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg);
+    void userMeasures(const geometry_msgs::Twist::ConstPtr& msg);
+    void scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg);
+
     void publishMsgs();
 
     ~ManipulationTransceiver() { close(fd); }
@@ -124,11 +136,10 @@ void ManipulationTransceiver::init() {
 
     int fail=0;
 
-    depth_ang=0.0;
-    //height_ang=90.0*D2R;
-    height_ang=0.0;
+    user_interface=0.0;
     sphere_dX=0.0;
     sphere_dY=0.0;
+    sphere_dZ=0.0;
 
     target_pos_x=0.719612;
     target_pos_y=0.0753333;
@@ -188,6 +199,9 @@ void ManipulationTransceiver::init() {
     android_gripper_pose_sub = nh_.subscribe<std_msgs::Int32> ("/android/gripper_pose/preset", 1, &ManipulationTransceiver::transceiverGripperPose, this );
     robot_odometry_sub = nh_.subscribe<geometry_msgs::PoseWithCovarianceStamped> ("/robot_pose_ekf/odom_combined", 1, &ManipulationTransceiver::robotOdometry, this );
 
+    user_measures_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/user_measures", 1, &ManipulationTransceiver::userMeasures, this );
+    scenario_number_sub = nh_.subscribe<std_msgs::Int32> ( "/android/scenario_number", 1, &ManipulationTransceiver::scenarioNumberCallback, this);
+
     //Publishers
     r_arm_navegation_pub = nh_.advertise<geometry_msgs::PoseStamped>( "/r_cart/command_pose", 1);
     l_arm_navegation_pub = nh_.advertise<geometry_msgs::PoseStamped>( "/l_cart/command_pose", 1);
@@ -224,44 +238,63 @@ void ManipulationTransceiver::init() {
 
 }
 
+
+void ManipulationTransceiver::scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg){
+    scenario_number = msg->data;
+    if(scenario_number==21){
+	//condition 1
+    }else if(scenario_number==22){
+	//condition 2
+    }else if(scenario_number==23){
+	//condition 3
+    }
+}
+
 void ManipulationTransceiver::interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg){
     interface_number = msg->data;
 }
 
+void ManipulationTransceiver::userMeasures(const geometry_msgs::Twist::ConstPtr& msg){
+    user_number = msg->linear.x;
+    user_interface = msg->linear.y;
+    user_time = msg->angular.x;
+}
+
 void ManipulationTransceiver::transceiverRArmNavigation(const geometry_msgs::Twist::ConstPtr& msg){
 
-    sphere_dX = sphere_dX + 0.25*msg->linear.x/CNTRL_FREQ;
-    sphere_dY = sphere_dY + 0.25*msg->linear.y/CNTRL_FREQ;
-    target_radius = target_radius + 0.5*msg->linear.z/CNTRL_FREQ;
+    
+    float dX = sphere_dX + 0.25*msg->linear.x/CNTRL_FREQ;
+    float dY = sphere_dY + 0.25*msg->linear.y/CNTRL_FREQ;
+    float dR = target_radius + 0.5*msg->linear.z/CNTRL_FREQ;
+    float dZ = sqrt(dR*dR - dX*dX - dY*dY);
+    float c=dR/target_radius;
+    dX=dX*c;
+    dY=dY*c;
+    dZ=dZ*c;
 
+    // this happens when trying to grasp the object from below
+    if( isnan(dZ))
+        return;
 
+    float proyR_XY= sqrt(dX*dX+dY*dY);
+    sphere_dZ = dZ;
+    sphere_dX = dX;
+    sphere_dY = dY;
+    target_radius = dR;
+
+    gripper_roll = atan( sphere_dZ / proyR_XY );
+    gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;
+    gripper_yaw = 90.0*D2R - atan2( (target_pos_x - gripper_pos_x) , (target_pos_y - gripper_pos_y) );
+    gripper_euler_mat.setEulerYPR(gripper_yaw,gripper_roll,gripper_pitch);
+    gripper_euler_mat.getRotation(gripper_quat);
 
     gripper_pos_x = target_pos_x + sphere_dX;
     gripper_pos_y = target_pos_y + sphere_dY;
-    gripper_pos_z = target_pos_z + sqrt(target_radius*target_radius - sphere_dX*sphere_dX - sphere_dY*sphere_dY);
+    gripper_pos_z = target_pos_z + sphere_dZ;
+
     r_ps_msg.pose.position.x = gripper_pos_x;
     r_ps_msg.pose.position.y = gripper_pos_y;
     r_ps_msg.pose.position.z = gripper_pos_z;
-
-    ROS_INFO_STREAM("x: " << sphere_dX << " y: " << sphere_dY);
-    //Yaw=Z;Pitch=Y;Roll=X
-
-//toca hacer los 4 cuadrantes..... --,+-,++,-+, con dX y dY
-    if(sphere_dY < 0.f){
-        gripper_roll = atan( (target_pos_z - gripper_pos_z) / (- target_pos_y + gripper_pos_y ) );
-        gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;
-        gripper_yaw = atan( (target_pos_x - gripper_pos_x) / (- target_pos_y + gripper_pos_y ) )  + 1.570796327;
-
-    }else{
-        gripper_roll = 3.141592654 - atan( (target_pos_z - gripper_pos_z) / ( target_pos_y - gripper_pos_y ) );
-        gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;
-        gripper_yaw = atan( (target_pos_x - gripper_pos_x) / (- target_pos_y + gripper_pos_y ) )  + 1.570796327;
-    }
-
-    ROS_INFO_STREAM("r: " << gripper_roll << " y: " << gripper_yaw << " p: " << gripper_pitch );
-
-    gripper_euler_mat.setEulerYPR(gripper_yaw,gripper_roll,gripper_pitch);
-    gripper_euler_mat.getRotation(gripper_quat);
     r_ps_msg.pose.orientation.x=gripper_quat.getX();
     r_ps_msg.pose.orientation.y=gripper_quat.getY();
     r_ps_msg.pose.orientation.z=gripper_quat.getZ();
@@ -283,86 +316,19 @@ void ManipulationTransceiver::transceiverRArmNavigation(const geometry_msgs::Twi
         r_ps_msg.pose.position.z = 0.5;
 
 }
-
-/*
-void ManipulationTransceiver::transceiverRArmNavigation(const geometry_msgs::Twist::ConstPtr& msg){
-
-    depth_ang = depth_ang + 2.0*msg->linear.x/CNTRL_FREQ;
-    height_ang = height_ang - 2.0*msg->linear.y/CNTRL_FREQ;
-    target_radius = target_radius + 0.5*msg->linear.z/CNTRL_FREQ;
-
-    if(depth_ang < -1.57)
-        depth_ang = -1.57;
-    if(depth_ang > 1.57)
-        depth_ang = 1.57;
-    if(height_ang < 0)
-        depth_ang = 0;
-    if(height_ang > 3.1415)
-        depth_ang = 3.1415;
-
-//    gripper_pos_x = target_pos_x + target_radius*sin(depth_ang);
-//    gripper_pos_y = target_pos_y + target_radius*cos(height_ang);
-//    gripper_pos_z = target_pos_z + target_radius*sin(height_ang);
-
-    ROS_INFO_STREAM("d: " << depth_ang << " h: " << height_ang);
-
-    gripper_pos_x = target_pos_x + target_radius*sin(depth_ang)*cos(height_ang);
-    gripper_pos_y = target_pos_y + target_radius*sin(depth_ang)*sin(height_ang);
-    gripper_pos_z = target_pos_z + target_radius*cos(depth_ang);
-    r_ps_msg.pose.position.x = gripper_pos_x;
-    r_ps_msg.pose.position.y = gripper_pos_y;
-    r_ps_msg.pose.position.z = gripper_pos_z;
-
-    ROS_INFO_STREAM("xr: " << gripper_pos_x << " yr: " << gripper_pos_y << " zr: " << gripper_pos_z );
-    //Yaw=Z;Pitch=Y;Roll=X
-
-    if(depth_ang<0){
-        gripper_roll = atan( (target_pos_z - gripper_pos_z) / (- target_pos_y + gripper_pos_y ) );
-        gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;
-        gripper_yaw = atan( (target_pos_x - gripper_pos_x) / (- target_pos_y + gripper_pos_y ) )  + 1.570796327;
-    }else{
-        gripper_roll = 3.141592654 - atan( (target_pos_z - gripper_pos_z) / ( target_pos_y - gripper_pos_y ) );
-        gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;
-        gripper_yaw = atan( (target_pos_x - gripper_pos_x) / (- target_pos_y + gripper_pos_y ) )  + 1.570796327;
-    }
-
-    ROS_INFO_STREAM("r: " << gripper_roll << " y: " << gripper_yaw << " p: " << gripper_pitch );
-    gripper_euler_mat.setEulerYPR(gripper_yaw,gripper_roll,gripper_pitch);
-    gripper_euler_mat.getRotation(gripper_quat);
-    r_ps_msg.pose.orientation.x=gripper_quat.getX();
-    r_ps_msg.pose.orientation.y=gripper_quat.getY();
-    r_ps_msg.pose.orientation.z=gripper_quat.getZ();
-    r_ps_msg.pose.orientation.w=gripper_quat.getW();
-
-    if(r_ps_msg.pose.position.x < 0.1)
-        r_ps_msg.pose.position.x = 0.1;
-    if(r_ps_msg.pose.position.x > 1.0)
-        r_ps_msg.pose.position.x = 1.0;
-
-    if(r_ps_msg.pose.position.y < -0.8)
-        r_ps_msg.pose.position.y = -0.8;
-    if(r_ps_msg.pose.position.y > 0.8)
-        r_ps_msg.pose.position.y = 0.8;
-
-    if(r_ps_msg.pose.position.z < -0.5)
-        r_ps_msg.pose.position.z = -0.5;
-    if(r_ps_msg.pose.position.z > 0.5)
-        r_ps_msg.pose.position.z = 0.5;
-
-}*/
 
 void ManipulationTransceiver::transceiverGripperPose(const std_msgs::Int32::ConstPtr& msg){
 
     int pose = msg->data;
     if (pose==1){ //right2left
-       depth_ang=-0.192491;
-       height_ang=2.63017;
+       sphere_dX=0.0;
+       sphere_dY=-0.95*target_radius;
     } else if (pose==2) { //front2back
-       depth_ang=-2.4102;
-       height_ang=2.13221;
+       sphere_dX=-0.95*target_radius;
+       sphere_dY=0.0;
     } else if (pose==3) { //top2down
-       depth_ang=0*D2R;
-       height_ang=90.0*D2R;
+       sphere_dX=-0.001;
+       sphere_dY=-0.001;
     }
 
 }
@@ -384,17 +350,30 @@ void ManipulationTransceiver::robotOdometry(const geometry_msgs::PoseWithCovaria
    double roll, pitch, yaw;
    m.getRPY(roll, pitch, yaw);
 }
+
 //TODO
 void ManipulationTransceiver::publishMsgs(){
-
-
 
     r_arm_navegation_pub.publish(r_ps_msg);  //arm1
     l_arm_navegation_pub.publish(l_ps_msg);  //arm2
     r_arm_grasp_pub.publish(gripper_msg);    //grasp1
     l_arm_grasp_pub.publish(gripper_msg);    //grasp2
-    lookAt("r_gripper_tool_frame", 0, 0, 0); //head
+    //lookAt("r_gripper_tool_frame", 0, 0, 0); //head
+    lookAt("base_link", 0.3+0.719612, 0.0753333, -0.172468); //head
 
+
+    if(user_interface>0.f){
+        std::string folder("/home/dhrodriguezg/usability_test/user_" + boost::to_string(user_number));
+        std::string name(folder + "/scenario" + boost::to_string(scenario_number) + "_interface_" + boost::to_string(user_interface) + ".txt");
+        boost::filesystem::path dir(folder);
+        boost::filesystem::create_directory(dir);
+        std::ofstream file(name.c_str());
+        file << boost::to_string(user_time);
+        file.close();
+        user_interface=0.f;
+        user_number=0.f;
+        user_time=0.f;
+    }
 }
 
 

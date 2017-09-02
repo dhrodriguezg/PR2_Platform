@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<launch>
+
+  <arg name="enable_usbcamera" default="false" />
+  <arg name="enable_cartesiancontrol" default="true" />
+  <arg name="enable_navigation_transceiver" default="true" />
+  <arg name="enable_camera_transceiver" default="true" />
+  <arg name="enable_activestream" default="true" />
+
+  <!-- USB Camera -->
+  <include if="$(arg enable_usbcamera)" file="$(find pr2_transceiver)/launch/usb_camera.launch"/>
+
+  <!-- Cartesian Arms -->
+  <include if="$(arg enable_cartesiancontrol)" file="$(find teleop_arms)/launch/jtteleop.launch"/>
+
+  <!-- MY navigation system, smartphone2robot -->
+  <node if="$(arg enable_navigation_transceiver)" name="teleop_transceiver" pkg="pr2_transceiver" type="navigation_transceiver" respawn="false" output="screen">
+  </node>
+
+  <!-- MY cameras system, robot2smartphone2 -->
+  <node if="$(arg enable_camera_transceiver)" name="camera_transceiver" pkg="pr2_transceiver" type="camera_transceiver" respawn="false" output="screen">
+  </node>
+
+  <!-- camera viewer, this is what the smartphone displays on the screen -->
+  <node if="$(arg enable_activestream)" name="image_view_android" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="android/image_raw"/>
+    <param name="autosize" value="true" />
+    <param name="image_transport" value="compressed" />
+  </node>
+
+</launch>

@@ -5,6 +5,7 @@
     <!-- A global light source -->
     <include>
       <uri>model://sun</uri>
+      <pose>0.0 -2 2 0.0 0.0 0.0</pose>
     </include>
 
     <!-- A ground plane -->
@@ -25,9 +26,8 @@
       <pose>0.65823 0.092414 0.6 0.0 0.0 3.057</pose>
     </include>
 
-    <model name="sphere">
+    <!-- model name="sphere">
       <static>true</static>
-      <!-- pose>0.650141 0.092925 0.632065 0 0 0</pose -->
       <pose>0.659448 0.097548 0.632065 0 0 0</pose>
       <link name="link">
         <visual name="visual">
@@ -46,12 +46,12 @@
           </material>
         </visual>
       </link>
-    </model>
+    </model -->
 
     <!-- A camera -->
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>14.9225 11.7673 11.3529 -3.71688e-17 0.727643 -2.53899</pose>
+        <pose>1.38346 -0.001124 1.57929 -1.03003e-17 0.831643 -2.99899</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>

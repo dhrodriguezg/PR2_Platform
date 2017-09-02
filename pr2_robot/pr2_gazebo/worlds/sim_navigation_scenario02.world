@@ -5,6 +5,7 @@
     <!-- A global light source -->
     <include>
       <uri>model://sun</uri>
+      <pose>0.0 -2 2 0.0 0.0 0.0</pose>
     </include>
 
     <!-- A ground plane -->
@@ -17,23 +18,21 @@
     <include>
       <uri>model://custom_scenario_02</uri>
       <name>scenario_02</name>
-      <pose>-0.96 0.2642 0.0 0.0 0.0 3.141592654</pose>
+      <pose>4 -1 0 0 0 -1.570796327</pose>
     </include>
 
     <include>
-      <uri>model://custom_mario_box</uri>
-      <pose>-1.2 3.55 0.5 0 0 -1.5623</pose>
+      <uri>model://custom_mystery_gift</uri>
+      <pose>4 -0.636 0.7475 0 0 3.1416</pose>
     </include>
 
     <!-- A camera -->
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>6.68316 4.16361 9.19717 0 0.847643 -2.64299</pose>
+        <pose>2.29869 -0.88789 9.26277 4.3528e-16 1.5698 0.00501</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
-
-
 
   </world>
 </sdf>

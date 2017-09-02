@@ -63,6 +63,7 @@ class NavigationTransceiver {
     ros::Subscriber user_measures_sub;
     ros::Subscriber robot_odometry_sub;
     ros::Subscriber head_target_sub;
+    ros::Subscriber scenario_number_sub;
 
     //Messages
     geometry_msgs::PoseStamped r_ps_msg;
@@ -103,6 +104,7 @@ class NavigationTransceiver {
     float sum_head_rz;
 
     int interface_number;
+    int scenario_number;
 
     float robot_target_x;
     float robot_target_y;
@@ -122,6 +124,7 @@ class NavigationTransceiver {
     void lookAt(std::string frame_id, double x, double y, double z);
     void robotOdometry(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
     void interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg);
+    void scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg);
     void transceiverRobotNavigation(const geometry_msgs::Twist::ConstPtr& msg);
     void userMeasures(const geometry_msgs::Twist::ConstPtr& msg);
     void headTargetCallback(const geometry_msgs::Twist::ConstPtr& msg);
@@ -139,8 +142,9 @@ void NavigationTransceiver::init() {
     user_time=0.f;
     user_interface=0.f;
 
-    robot_target_x= 2.8205;
-    robot_target_y=-3.57335;
+    //scenario 1
+    robot_target_x= 1.0;
+    robot_target_y= 0.0;
 
     last_base_yaw=0.0;
     base_yaw=0.0;
@@ -179,6 +183,7 @@ void NavigationTransceiver::init() {
     user_measures_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/user_measures", 1, &NavigationTransceiver::userMeasures, this );
     android_robot_navegation_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/robot_navegation", 1, &NavigationTransceiver::transceiverRobotNavigation, this );
     head_target_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/head_target", 1, &NavigationTransceiver::headTargetCallback, this );
+    scenario_number_sub = nh_.subscribe<std_msgs::Int32> ( "/android/scenario_number", 1, &NavigationTransceiver::scenarioNumberCallback, this);
 
     //Publishers
     robot_navegation_pub = nh_.advertise<geometry_msgs::Twist>( "/base_controller/command", 1);
@@ -220,6 +225,20 @@ void NavigationTransceiver::init() {
 
 void NavigationTransceiver::interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg){
     interface_number = msg->data;
+}
+
+void NavigationTransceiver::scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg){
+    scenario_number = msg->data;
+    if(scenario_number==11){
+        robot_target_x= 3.0;
+        robot_target_y=-4.0;
+    }else if(scenario_number==12){
+        robot_target_x= 3.7;
+        robot_target_y= 0.14;
+    }else if(scenario_number==13){
+        robot_target_x= 5.0;
+        robot_target_y= 0.5;
+    }
 }
 
 void NavigationTransceiver::userMeasures(const geometry_msgs::Twist::ConstPtr& msg){
@@ -273,12 +292,12 @@ void NavigationTransceiver::publishMsgs(){
     l_arm_navegation_pub.publish(l_ps_msg); //arm2
     robot_navegation_pub.publish(robot_pose_msg); //robot pose
 
-    float target_distance = sqrt( (base_x-robot_target_x)*(base_x-robot_target_x) +  (base_y-robot_target_y)*(base_y-robot_target_y) );
+    float target_distance = sqrt( (base_x-robot_target_x)*(base_x-robot_target_x) + (base_y-robot_target_y)*(base_y-robot_target_y) );
     robot_target_msg.data = target_distance;
     robot_target_pub.publish(robot_target_msg); //target distance
 
     //head
-    float ref_head_ry = head_ry + 1.570796327;
+    float ref_head_ry = head_ry + 120*D2R;
     if(interface_number==INTERFACE01 || interface_number==INTERFACE02){
         target_x = 0.0 + 1.0*sin(ref_head_ry)*cos(head_rz);
         target_y = 0.0 + 1.0*sin(ref_head_ry)*sin(head_rz);
@@ -308,7 +327,7 @@ void NavigationTransceiver::publishMsgs(){
 
     if(user_interface>0.f){
         std::string folder("/home/dhrodriguezg/usability_test/user_" + boost::to_string(user_number));
-        std::string name(folder + "/scenarioA_interface_" + boost::to_string(user_interface) + ".txt");
+        std::string name(folder + "/scenario" + boost::to_string(scenario_number) + "_interface_" + boost::to_string(user_interface) + ".txt");
         boost::filesystem::path dir(folder);
         boost::filesystem::create_directory(dir);
         std::ofstream file(name.c_str());

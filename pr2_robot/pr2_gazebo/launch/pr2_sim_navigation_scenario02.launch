@@ -16,7 +16,10 @@
 
   <!-- publish scenario 2 -->
   <node name="param_sender" pkg="pr2_transceiver" type="param_sender" respawn="false" output="screen">
-    <param name="scenario_number" type="int" value="12" />
+    <param name="scenario_number" type="int" value="2" />
+    <param name="target_px" type="double" value="3.7" />
+    <param name="target_py" type="double" value="0.14" />
+    <param name="target_rz" type="double" value="-1.570796327"/>
   </node>
 
 

@@ -14,9 +14,15 @@
   <!-- start pr2 robot -->
   <include file="$(find pr2_gazebo)/launch/pr2.launch"/>
 
-  <!-- publish scenario 3 -->
+  <!-- publish scenario 1 -->
   <node name="param_sender" pkg="pr2_transceiver" type="param_sender" respawn="false" output="screen">
-    <param name="scenario_number" type="int" value="21" />
+    <param name="scenario_number" type="int" value="1" />  
+    <param name="target_px" type="double" value="0.50" />
+    <param name="target_py" type="double" value="0.0" />
+    <param name="target_pz" type="double" value="0.6284" />
+    <param name="target_rx" type="double" value="0.508768" />
+    <param name="target_ry" type="double" value="-0.021325" />
+    <param name="target_rz" type="double" value="0.669494" />
   </node>
 
 </launch>

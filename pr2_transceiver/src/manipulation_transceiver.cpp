@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <math.h>
 #include <ros/ros.h>
+#include <ros/package.h>
 #include <actionlib/client/simple_action_client.h>
 #include <pr2_controllers_msgs/PointHeadAction.h>
 #include <pr2_controllers_msgs/Pr2GripperCommand.h>
@@ -19,7 +20,13 @@
 #include "sensor_msgs/CompressedImage.h"
 #include "sensor_msgs/Joy.h"
 
+#include <gazebo_msgs/DeleteModel.h>
+#include <gazebo_msgs/SpawnModel.h>
+#include <gazebo_msgs/ModelState.h>
+
+
 #include <boost/thread/thread.hpp>
+#include <boost/algorithm/string.hpp>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,6 +49,10 @@ const float D2R = 0.017453293;
 const char velocity_str[] = "velocity";
 const char ptz_str[] = "ptz";
 
+const std::string sphere_name = (std::string) "sphere_rad_";
+const int min=01;
+const int max=40;
+
 //ManipulationTransceiver Class
 class ManipulationTransceiver {
   public:
@@ -56,21 +67,23 @@ class ManipulationTransceiver {
     ros::Publisher l_arm_navegation_pub;
     ros::Publisher r_arm_grasp_pub;
     ros::Publisher l_arm_grasp_pub;
+    ros::Publisher state_model_pub;
+    ros::Publisher robot_target_pub;
 
     //Subscribers
     ros::Subscriber android_gripper_pose_sub;
     ros::Subscriber android_r_arm_navigation_sub;
     ros::Subscriber android_r_arm_grasp_sub;
     ros::Subscriber robot_odometry_sub;
-    ros::Subscriber interface_number_sub;
     ros::Subscriber user_measures_sub;
     ros::Subscriber scenario_number_sub;
-
+    ros::Subscriber goal_pose_sub;
     //Messages
     pr2_controllers_msgs::Pr2GripperCommand gripper_msg;
     geometry_msgs::PoseStamped r_ps_msg;
     geometry_msgs::PoseStamped l_ps_msg;
-
+    gazebo_msgs::ModelState state_model_msg;
+    std_msgs::Float32 robot_target_msg;
 
     // Conversion to Quaternion
     tf::Matrix3x3 gripper_euler_mat;
@@ -93,15 +106,26 @@ class ManipulationTransceiver {
     float target_pos_y;
     float target_pos_z;
     float target_radius;
+    float target_rot_x;
+    float target_rot_y;
+    float target_rot_z;
+
+    float pr2_corr_x;
+    float pr2_corr_y;
+    float pr2_corr_z;
+
     float sphere_dX;
     float sphere_dY;
     float sphere_dZ;
 
-    int interface_number;
     int scenario_number;
     float user_number;
     float user_interface;
     float user_time;
+    bool is_user_online;
+    std::string username;
+
+    float target_distance;
 
     //udp socket
     bool udpReady;                  /* # bytes received */
@@ -122,10 +146,10 @@ class ManipulationTransceiver {
     void transceiverGrasp(const std_msgs::Float32::ConstPtr& msg);
     void transceiverGripperPose(const std_msgs::Int32::ConstPtr& msg);
     void robotOdometry(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
-    void interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg);
     void userMeasures(const geometry_msgs::Twist::ConstPtr& msg);
     void scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg);
-
+    void goalPoseCallback(const geometry_msgs::Twist::ConstPtr& msg);
+    void updateSphere();
     void publishMsgs();
 
     ~ManipulationTransceiver() { close(fd); }
@@ -135,16 +159,27 @@ class ManipulationTransceiver {
 void ManipulationTransceiver::init() {
 
     int fail=0;
-
+    is_user_online=false;
     user_interface=0.0;
     sphere_dX=0.0;
     sphere_dY=0.0;
     sphere_dZ=0.0;
 
-    target_pos_x=0.719612;
-    target_pos_y=0.0753333;
-    target_pos_z=-0.172468;
+    pr2_corr_x=0.049931;
+    pr2_corr_y=-0.00161;
+    pr2_corr_z=-0.764212;
+
+//    target_pos_x=0.719612;
+//    target_pos_y=0.0753333;
+//    target_pos_z=-0.172468;
+
+    target_pos_x=0.5;// just a starting point.
+    target_pos_y=0.00161;
+    target_pos_z=-0.15;
     target_radius=0.20;
+    target_rot_x=0.f;
+    target_rot_y=0.f;
+    target_rot_z=0.f;
     //target_pos_x=0.650141;
     //target_pos_y=0.092925;
     //target_pos_z=0.632065; //offset of the gripper
@@ -193,7 +228,6 @@ void ManipulationTransceiver::init() {
 
 
     //Subscribers
-    interface_number_sub = nh_.subscribe<std_msgs::Int32> ( "/android/interface_number", 1, &ManipulationTransceiver::interfaceNumberCallback, this);
     android_r_arm_navigation_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/r_arm_navigation", 1, &ManipulationTransceiver::transceiverRArmNavigation, this );
     android_r_arm_grasp_sub = nh_.subscribe<std_msgs::Float32> ("/android/r_arm_grasp", 1, &ManipulationTransceiver::transceiverGrasp, this );
     android_gripper_pose_sub = nh_.subscribe<std_msgs::Int32> ("/android/gripper_pose/preset", 1, &ManipulationTransceiver::transceiverGripperPose, this );
@@ -201,18 +235,22 @@ void ManipulationTransceiver::init() {
 
     user_measures_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/user_measures", 1, &ManipulationTransceiver::userMeasures, this );
     scenario_number_sub = nh_.subscribe<std_msgs::Int32> ( "/android/scenario_number", 1, &ManipulationTransceiver::scenarioNumberCallback, this);
+    goal_pose_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/goal_pose", 1, &ManipulationTransceiver::goalPoseCallback, this );
 
     //Publishers
     r_arm_navegation_pub = nh_.advertise<geometry_msgs::PoseStamped>( "/r_cart/command_pose", 1);
     l_arm_navegation_pub = nh_.advertise<geometry_msgs::PoseStamped>( "/l_cart/command_pose", 1);
     r_arm_grasp_pub = nh_.advertise<pr2_controllers_msgs::Pr2GripperCommand>( "/r_gripper_controller/command", 1);
     l_arm_grasp_pub = nh_.advertise<pr2_controllers_msgs::Pr2GripperCommand>( "/l_gripper_controller/command", 1);
+    state_model_pub = nh_.advertise<gazebo_msgs::ModelState>("/gazebo/set_model_state", 1);
+    robot_target_pub = nh_.advertise<std_msgs::Float32>( "/android/robot_base/target_distance", 1);
 
     //Head control
     point_head_client_ = new PointHeadClient("/head_traj_controller/point_head_action", true);
     while(!point_head_client_->waitForServer(ros::Duration(5.0))){
       ROS_INFO("Waiting for the point_head_action server to come up");
     }
+    nh_.param<std::string>("username", username, "default");
 
     //UDP socket config
     socklen_t addrlen = sizeof(remaddr);
@@ -250,8 +288,14 @@ void ManipulationTransceiver::scenarioNumberCallback(const std_msgs::Int32::Cons
     }
 }
 
-void ManipulationTransceiver::interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg){
-    interface_number = msg->data;
+
+void ManipulationTransceiver::goalPoseCallback(const geometry_msgs::Twist::ConstPtr& msg){
+    target_pos_x=msg->linear.x;
+    target_pos_y=msg->linear.y;
+    target_pos_z=msg->linear.z;
+    target_rot_x=msg->angular.x;
+    target_rot_y=msg->angular.y;
+    target_rot_z=msg->angular.z;
 }
 
 void ManipulationTransceiver::userMeasures(const geometry_msgs::Twist::ConstPtr& msg){
@@ -262,25 +306,36 @@ void ManipulationTransceiver::userMeasures(const geometry_msgs::Twist::ConstPtr&
 
 void ManipulationTransceiver::transceiverRArmNavigation(const geometry_msgs::Twist::ConstPtr& msg){
 
-    
-    float dX = sphere_dX + 0.25*msg->linear.x/CNTRL_FREQ;
-    float dY = sphere_dY + 0.25*msg->linear.y/CNTRL_FREQ;
+    is_user_online=true;
     float dR = target_radius + 0.5*msg->linear.z/CNTRL_FREQ;
-    float dZ = sqrt(dR*dR - dX*dX - dY*dY);
+    float dX = sphere_dX + dR*msg->linear.x/CNTRL_FREQ;
+    float dY = sphere_dY + dR*msg->linear.y/CNTRL_FREQ;
+
+
+    if(dR>0.2)
+        dR=0.2;
+    if(dR<0.01)
+        dR=0.01;
+
     float c=dR/target_radius;
     dX=dX*c;
     dY=dY*c;
-    dZ=dZ*c;
+    float dZ = sqrt(dR*dR - dX*dX - dY*dY);
+//    dZ=dZ*c;
 
     // this happens when trying to grasp the object from below
     if( isnan(dZ))
         return;
 
     float proyR_XY= sqrt(dX*dX+dY*dY);
-    sphere_dZ = dZ;
     sphere_dX = dX;
     sphere_dY = dY;
+    sphere_dZ = dZ;
     target_radius = dR;
+
+    gripper_pos_x = target_pos_x + sphere_dX;
+    gripper_pos_y = target_pos_y + sphere_dY;
+    gripper_pos_z = target_pos_z + sphere_dZ;
 
     gripper_roll = atan( sphere_dZ / proyR_XY );
     gripper_pitch = gripper_pitch + msg->angular.y/CNTRL_FREQ;
@@ -288,13 +343,9 @@ void ManipulationTransceiver::transceiverRArmNavigation(const geometry_msgs::Twi
     gripper_euler_mat.setEulerYPR(gripper_yaw,gripper_roll,gripper_pitch);
     gripper_euler_mat.getRotation(gripper_quat);
 
-    gripper_pos_x = target_pos_x + sphere_dX;
-    gripper_pos_y = target_pos_y + sphere_dY;
-    gripper_pos_z = target_pos_z + sphere_dZ;
-
-    r_ps_msg.pose.position.x = gripper_pos_x;
-    r_ps_msg.pose.position.y = gripper_pos_y;
-    r_ps_msg.pose.position.z = gripper_pos_z;
+    r_ps_msg.pose.position.x = gripper_pos_x+pr2_corr_x;
+    r_ps_msg.pose.position.y = gripper_pos_y+pr2_corr_y;
+    r_ps_msg.pose.position.z = gripper_pos_z+pr2_corr_z;
     r_ps_msg.pose.orientation.x=gripper_quat.getX();
     r_ps_msg.pose.orientation.y=gripper_quat.getY();
     r_ps_msg.pose.orientation.z=gripper_quat.getZ();
@@ -351,33 +402,47 @@ void ManipulationTransceiver::robotOdometry(const geometry_msgs::PoseWithCovaria
    m.getRPY(roll, pitch, yaw);
 }
 
-//TODO
+
 void ManipulationTransceiver::publishMsgs(){
 
-    r_arm_navegation_pub.publish(r_ps_msg);  //arm1
-    l_arm_navegation_pub.publish(l_ps_msg);  //arm2
-    r_arm_grasp_pub.publish(gripper_msg);    //grasp1
-    l_arm_grasp_pub.publish(gripper_msg);    //grasp2
-    //lookAt("r_gripper_tool_frame", 0, 0, 0); //head
-    lookAt("base_link", 0.5+0.719612, 0.0753333, -0.172468); //head
-
-
     if(user_interface>0.f){
-        std::string folder("/home/dhrodriguezg/usability_test/user_" + boost::to_string(user_number));
-        std::string name(folder + "/scenario" + boost::to_string(scenario_number) + "_interface_" + boost::to_string(user_interface) + ".txt");
-        boost::filesystem::path dir(folder);
-        boost::filesystem::create_directory(dir);
-        std::ofstream file(name.c_str());
-        file << boost::to_string(user_time);
-        file.close();
-        user_interface=0.f;
-        user_number=0.f;
-        user_time=0.f;
+        if(user_number>0.f){
+            std::string folder("/home/" + username + "/usability_test/user_" + boost::to_string(user_number));
+            std::string name(folder + "/manipulation_scenario_" + boost::to_string(scenario_number) + "_interface_" + boost::to_string(user_interface) + ".csv");
+            boost::filesystem::path dir(folder);
+            boost::filesystem::create_directories(dir);
+            std::ofstream file(name.c_str());
+            file << "time,error,gripper_x,gripper_y,gripper_z,goal_x,goal_y,goal_z" << std::endl;
+            file << user_time << "," << target_distance << ",";
+            file << gripper_pos_x << "," << gripper_pos_y << "," << gripper_pos_z << ",";
+            file << target_rot_x << "," << target_rot_y << "," << target_rot_z;
+            file.close();
+            //user_interface=0.f;
+            user_number=0.f;
+            user_time=0.f;
+        }
+        r_ps_msg.pose.position.z = gripper_pos_z+pr2_corr_z+0.3;
+        gripper_msg.position = 0.0;
+        r_arm_navegation_pub.publish(r_ps_msg);  //arm1
+        r_arm_grasp_pub.publish(gripper_msg);    //grasp1
+        lookAt("base_link", target_pos_x, target_pos_y-0.2, target_pos_z+0.3); //head
+    }else{
+        target_distance = (float)sqrt( pow (target_pos_x-gripper_pos_x, 2.0) + pow (target_pos_y-gripper_pos_y, 2.0) + pow (target_pos_z-gripper_pos_z, 2.0) );
+        robot_target_msg.data = target_distance;
+        robot_target_pub.publish(robot_target_msg); //target distance
+
+        r_arm_navegation_pub.publish(r_ps_msg);  //arm1
+        l_arm_navegation_pub.publish(l_ps_msg);  //arm2
+        r_arm_grasp_pub.publish(gripper_msg);    //grasp1
+        l_arm_grasp_pub.publish(gripper_msg);    //grasp2
+        //lookAt("r_gripper_tool_frame", 0, 0, 0); //head
+        lookAt("base_link", target_pos_x, target_pos_y-0.2, target_pos_z+0.1); //head
     }
+
 }
 
 
-//TODO
+
 void ManipulationTransceiver::transceiveUDPMsg(){
 
   while ( nh_.ok() ){
@@ -463,6 +528,57 @@ void ManipulationTransceiver::lookAt(std::string frame_id, double x, double y, d
 
 }
 
+//TODO
+void ManipulationTransceiver::updateSphere(){
+
+    while ( !is_user_online ) {//waiting for user
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+	if( !nh_.ok() )
+            return;
+    }
+    geometry_msgs::Pose start_pose;
+    geometry_msgs::Pose end_pose;
+    end_pose.position.z = 100.0;
+
+    gazebo_msgs::ModelState model_state;
+    model_state.pose=end_pose;
+
+    /*std::string path = ros::package::getPath("pr2_gazebo") + "/urdf/custom_sphere.sdf";
+    std::ifstream model_file( path.c_str() ) ;
+    std::stringstream buffer;
+    buffer << model_file.rdbuf();*/
+
+    std::string old_model_name="none";
+    int old_index=0;
+    while (nh_.ok()) {
+        start_pose.position.x = target_pos_x;
+        start_pose.position.y = target_pos_y;
+        start_pose.position.z = target_pos_z;
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+        int index = target_radius*200.f-1;
+	if (index<min)
+            index=min;
+	if (index>max)
+            index=max;
+
+        if(index != old_index){//change sphere
+            //show new sphere
+            std::string model_name = sphere_name + boost::to_string(index);
+            model_state.model_name=model_name;
+            model_state.pose=start_pose;
+            state_model_pub.publish(model_state);
+            //hide old sphere
+            model_state.model_name=old_model_name;
+            model_state.pose=end_pose;
+            state_model_pub.publish(model_state);
+
+            old_model_name=model_name; //update old sphere
+            old_index=index; //update old index
+        }
+    }
+
+}
+
 
 int main(int argc, char** argv)
 {
@@ -472,7 +588,7 @@ int main(int argc, char** argv)
     manipulationTransceiver.init();
     ros::Rate pub_rate(CNTRL_FREQ);
 
-    //boost::thread t( &ManipulationTransceiver::transceiveUDPMsg, &manipulationTransceiver );
+    boost::thread t( &ManipulationTransceiver::updateSphere, &manipulationTransceiver );
     //ros::spin();
 
     while (manipulationTransceiver.nh_.ok()) {

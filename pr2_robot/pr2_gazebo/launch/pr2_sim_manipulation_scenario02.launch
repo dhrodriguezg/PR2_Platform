@@ -2,21 +2,28 @@
 <launch>
 
   <!-- start up empty world -->
-  <arg name="gui" default="false"/>
-  <arg name="paused" default="true"/>
-  <!-- TODO: throttled not implemented in gazebo_ros/empty_world.launch
-  <arg name="throttled" default="false"/>
-  -->
+  <arg name="gui" default="true"/>
 
   <!-- We resume the logic in empty_world.launch, changing only the name of 
    the world to be launched -->
    <include file="$(find gazebo_ros)/launch/empty_world.launch">
       <arg name="world_name" value="$(find pr2_gazebo)/worlds/sim_manipulation_scenario02.world" />
-      <arg name="gui" default="true"/>
+      <arg name="gui" default="$(arg gui)"/>
    </include>
 
   <!-- start pr2 robot -->
   <include file="$(find pr2_gazebo)/launch/pr2.launch"/>
+
+  <!-- publish scenario 2 rad: -->
+  <node name="param_sender" pkg="pr2_transceiver" type="param_sender" respawn="false" output="screen">
+    <param name="scenario_number" type="int" value="2" />  
+    <param name="target_px" type="double" value="0.5711" />
+    <param name="target_py" type="double" value="0.0" />
+    <param name="target_pz" type="double" value="0.58" />
+    <param name="target_rx" type="double" value="0.572012" />
+    <param name="target_ry" type="double" value="-0.008645" />
+    <param name="target_rz" type="double" value="0.637498" />
+  </node>
 
 </launch>
 

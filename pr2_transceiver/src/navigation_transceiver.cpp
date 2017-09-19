@@ -64,6 +64,7 @@ class NavigationTransceiver {
     ros::Subscriber robot_odometry_sub;
     ros::Subscriber head_target_sub;
     ros::Subscriber scenario_number_sub;
+    ros::Subscriber goal_pose_sub;
 
     //Messages
     geometry_msgs::PoseStamped r_ps_msg;
@@ -77,6 +78,7 @@ class NavigationTransceiver {
 
     float user_number;
     float user_time;
+    float user_goal_time;
     float user_interface;
 
     // Base odometry data
@@ -105,9 +107,13 @@ class NavigationTransceiver {
 
     int interface_number;
     int scenario_number;
+    std::string username;
 
     float robot_target_x;
     float robot_target_y;
+    float robot_target_rot;
+
+    float target_distance;
 
     //udp socket
     bool udpReady;                    /* # bytes received */
@@ -125,6 +131,7 @@ class NavigationTransceiver {
     void robotOdometry(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg);
     void interfaceNumberCallback(const std_msgs::Int32::ConstPtr& msg);
     void scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg);
+    void goalPoseCallback(const geometry_msgs::Twist::ConstPtr& msg);
     void transceiverRobotNavigation(const geometry_msgs::Twist::ConstPtr& msg);
     void userMeasures(const geometry_msgs::Twist::ConstPtr& msg);
     void headTargetCallback(const geometry_msgs::Twist::ConstPtr& msg);
@@ -140,11 +147,13 @@ void NavigationTransceiver::init() {
     udpReady = true;
     user_number=0.f;
     user_time=0.f;
+    user_goal_time=0.f;
     user_interface=0.f;
 
     //scenario 1
     robot_target_x= 1.0;
     robot_target_y= 0.0;
+    robot_target_rot = 0.0;
 
     last_base_yaw=0.0;
     base_yaw=0.0;
@@ -160,7 +169,7 @@ void NavigationTransceiver::init() {
     gripper_euler_mat.getRotation(gripper_quat);
     r_ps_msg.header.frame_id = "/torso_lift_link";
     r_ps_msg.pose.position.x= 0.70;
-    r_ps_msg.pose.position.y=-0.05;
+    r_ps_msg.pose.position.y=-0.25;
     r_ps_msg.pose.position.z=-0.60;
     r_ps_msg.pose.orientation.x=gripper_quat.getX();
     r_ps_msg.pose.orientation.y=gripper_quat.getY();
@@ -169,7 +178,7 @@ void NavigationTransceiver::init() {
 
     l_ps_msg.header.frame_id = "/torso_lift_link";
     l_ps_msg.pose.position.x= 0.70;
-    l_ps_msg.pose.position.y= 0.05;
+    l_ps_msg.pose.position.y= 0.25;
     l_ps_msg.pose.position.z=-0.60;
     l_ps_msg.pose.orientation.x=gripper_quat.getX();
     l_ps_msg.pose.orientation.y=gripper_quat.getY();
@@ -184,6 +193,7 @@ void NavigationTransceiver::init() {
     android_robot_navegation_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/robot_navegation", 1, &NavigationTransceiver::transceiverRobotNavigation, this );
     head_target_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/head_target", 1, &NavigationTransceiver::headTargetCallback, this );
     scenario_number_sub = nh_.subscribe<std_msgs::Int32> ( "/android/scenario_number", 1, &NavigationTransceiver::scenarioNumberCallback, this);
+    goal_pose_sub = nh_.subscribe<geometry_msgs::Twist> ("/android/goal_pose", 1, &NavigationTransceiver::goalPoseCallback, this );
 
     //Publishers
     robot_navegation_pub = nh_.advertise<geometry_msgs::Twist>( "/base_controller/command", 1);
@@ -196,7 +206,7 @@ void NavigationTransceiver::init() {
     while(!point_head_client_->waitForServer(ros::Duration(5.0))){
       ROS_INFO("Waiting for the point_head_action server to come up");
     }
-
+    nh_.param<std::string>("username", username, "default");
 
     //UDP socket config
     int fail;
@@ -229,36 +239,34 @@ void NavigationTransceiver::interfaceNumberCallback(const std_msgs::Int32::Const
 
 void NavigationTransceiver::scenarioNumberCallback(const std_msgs::Int32::ConstPtr& msg){
     scenario_number = msg->data;
-    if(scenario_number==11){
-        robot_target_x= 3.0;
-        robot_target_y=-4.0;
-    }else if(scenario_number==12){
-        robot_target_x= 3.7;
-        robot_target_y= 0.14;
-    }else if(scenario_number==13){
-        robot_target_x= 5.0;
-        robot_target_y= 0.5;
-    }
+}
+
+void NavigationTransceiver::goalPoseCallback(const geometry_msgs::Twist::ConstPtr& msg){
+    robot_target_x = msg->linear.x;
+    robot_target_y = msg->linear.y;
+    robot_target_rot = msg->angular.z;
 }
 
 void NavigationTransceiver::userMeasures(const geometry_msgs::Twist::ConstPtr& msg){
     user_number = msg->linear.x;
     user_interface = msg->linear.y;
     user_time = msg->angular.x;
+    user_goal_time = msg->angular.y;
 }
 
 void NavigationTransceiver::transceiverRobotNavigation(const geometry_msgs::Twist::ConstPtr& msg){
 
+    robot_pose_msg.linear.x = 0.f; //frente
+    robot_pose_msg.angular.z = 0.f; //rotar
     if(interface_number==INTERFACE01 || interface_number==INTERFACE02){
         robot_pose_msg.linear.x = msg->linear.x; //frente
         robot_pose_msg.angular.z = msg->angular.z; //rotar
-        robot_navegation_pub.publish(robot_pose_msg);
     }else if (interface_number==INTERFACE03){
         robot_pose_msg.linear.x = msg->linear.x*target_x; //frente
         robot_pose_msg.angular.z = msg->linear.x*target_y; //rotar
-        if(robot_pose_msg.linear.x < 0)
-            robot_pose_msg.angular.z = -robot_pose_msg.angular.z; //rotar
     }
+    if(robot_pose_msg.linear.x < 0)
+        robot_pose_msg.angular.z = -robot_pose_msg.angular.z;
     robot_pose_msg.linear.y = msg->linear.y; //lado
     robot_pose_msg.linear.z = msg->linear.z;
     robot_pose_msg.angular.x = msg->angular.x;
@@ -288,59 +296,61 @@ void NavigationTransceiver::headTargetCallback(const geometry_msgs::Twist::Const
 
 void NavigationTransceiver::publishMsgs(){
 
-    r_arm_navegation_pub.publish(r_ps_msg); //arm1
-    l_arm_navegation_pub.publish(l_ps_msg); //arm2
-    robot_navegation_pub.publish(robot_pose_msg); //robot pose
-
-    float target_distance = sqrt( (base_x-robot_target_x)*(base_x-robot_target_x) + (base_y-robot_target_y)*(base_y-robot_target_y) );
-    robot_target_msg.data = target_distance;
-    robot_target_pub.publish(robot_target_msg); //target distance
-
-    //head
-    float ref_head_ry = head_ry + 120*D2R;
-    if(interface_number==INTERFACE01 || interface_number==INTERFACE02){
-        target_x = 0.0 + 1.0*sin(ref_head_ry)*cos(head_rz);
-        target_y = 0.0 + 1.0*sin(ref_head_ry)*sin(head_rz);
-        target_z = 1.2 + 1.0*cos(ref_head_ry);
-
-        lookAt("base_link", target_x, target_y, target_z);
-
-    }else if (interface_number==INTERFACE03){
-        float current_base_yaw = base_yaw;
-        float current_head_rz = head_rz;
-
-        float base_dRZ = current_base_yaw - last_base_yaw;
-        float head_dRZ = current_head_rz - last_head_rz;
-
-        sum_head_rz = sum_head_rz + head_dRZ - base_dRZ;
-
-        target_x = 0.0 + 1.0*sin(ref_head_ry)*cos(sum_head_rz);
-        target_y = 0.0 + 1.0*sin(ref_head_ry)*sin(sum_head_rz);
-        target_z = 1.2 + 1.0*cos(ref_head_ry);
-
-        //ROS_INFO_STREAM("XYZ: " << target_x << "|" << target_y << "|" << target_z);
-        lookAt("base_link", target_x, target_y, target_z);
-
-        last_base_yaw=current_base_yaw;
-        last_head_rz = current_head_rz;
-    }
-
     if(user_interface>0.f){
-        std::string folder("/home/dhrodriguezg/usability_test/user_" + boost::to_string(user_number));
-        std::string name(folder + "/scenario" + boost::to_string(scenario_number) + "_interface_" + boost::to_string(user_interface) + ".txt");
-        boost::filesystem::path dir(folder);
-        boost::filesystem::create_directory(dir);
-        std::ofstream file(name.c_str());
-        file << boost::to_string(user_time);
-        file.close();
-        user_interface=0.f;
-        user_number=0.f;
-        user_time=0.f;
+        if(user_number>0.f){
+            std::string folder("/home/" + username + "/usability_test/user_" + boost::to_string(user_number));
+            std::string name(folder + "/navigation_scenario_" + boost::to_string(scenario_number) + "_interface_" + boost::to_string(user_interface) + ".csv");
+            boost::filesystem::path dir(folder);
+            boost::filesystem::create_directories(dir);
+            std::ofstream file(name.c_str());
+            file << "total_time,goal_time,error_pos,error_rot,robot_x,robot_y,robot_yaw,goal_x,goal_y,goal_yaw" << std::endl;
+            file << user_time << "," << user_goal_time << "," << target_distance << "," << (robot_target_rot-base_yaw);
+            file << "," << base_x << "," << base_y << "," << base_yaw;
+            file << "," << robot_target_x << "," << robot_target_y << "," << robot_target_rot;
+            file.close();
+            //user_interface=0.f;
+            user_number=0.f;
+            user_time=0.f;
+        }
+    }else{
+        r_arm_navegation_pub.publish(r_ps_msg); //arm1
+        l_arm_navegation_pub.publish(l_ps_msg); //arm2
+        robot_navegation_pub.publish(robot_pose_msg); //robot pose
+    
+        target_distance = sqrt( (base_x-robot_target_x)*(base_x-robot_target_x) + (base_y-robot_target_y)*(base_y-robot_target_y) );
+        robot_target_msg.data = target_distance;
+        robot_target_pub.publish(robot_target_msg); //target distance
+    
+        //head
+        float ref_head_ry = head_ry + 120*D2R;
+        if(interface_number==INTERFACE01 || interface_number==INTERFACE02){
+            target_x = 0.0 + 1.0*sin(ref_head_ry)*cos(head_rz);
+            target_y = 0.0 + 1.0*sin(ref_head_ry)*sin(head_rz);
+            target_z = 1.2 + 1.0*cos(ref_head_ry);
+    
+            lookAt("base_link", target_x, target_y, target_z);
+    
+        }else if (interface_number==INTERFACE03){
+            float current_base_yaw = base_yaw;
+            float current_head_rz = head_rz;
+    
+            float base_dRZ = current_base_yaw - last_base_yaw;
+            float head_dRZ = current_head_rz - last_head_rz;
+    
+            sum_head_rz = sum_head_rz + head_dRZ - base_dRZ;
+    
+            target_x = 0.0 + 1.0*sin(ref_head_ry)*cos(sum_head_rz);
+            target_y = 0.0 + 1.0*sin(ref_head_ry)*sin(sum_head_rz);
+            target_z = 1.2 + 1.0*cos(ref_head_ry);
+            //ROS_INFO_STREAM("XYZ: " << target_x << "|" << target_y << "|" << target_z);
+            lookAt("base_link", target_x, target_y, target_z);
+            last_base_yaw=current_base_yaw;
+            last_head_rz = current_head_rz;
+        }
     }
 }
 
 
-//TODO
 void NavigationTransceiver::transceiveUDPMsg(){
 
   while ( nh_.ok() ){

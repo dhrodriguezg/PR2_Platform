@@ -16,7 +16,10 @@
 
   <!-- publish scenario 1 -->
   <node name="param_sender" pkg="pr2_transceiver" type="param_sender" respawn="false" output="screen">
-    <param name="scenario_number" type="int" value="11" />
+    <param name="scenario_number" type="int" value="1" />
+    <param name="target_px" type="double" value="3.0" />
+    <param name="target_py" type="double" value="-4.0" />
+    <param name="target_rz" type="double" value="0.872664626"/>
   </node>
 
   <!-- Load the URDF into the ROS Parameter Server -->

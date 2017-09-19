@@ -17,21 +17,966 @@
     <include>
       <uri>model://custom_scenario_03</uri>
       <name>scenario_03</name>
-      <pose>9.199188 -1.488349 0.0 0.0 0.0 1.570796327</pose>
+      <pose>9.199188 -1.488349 -0.1 0.0 0.0 1.570796327</pose>
     </include>
 
     <include>
-      <uri>model://custom_ballarino</uri>
-      <pose>0.663444 -0.005082 0.69582 0.08441 -0.0598 -1.4695</pose>
+      <uri>model://custom_table</uri>
+      <pose>0.7059 0 0.565 0 0 0</pose>
     </include>
+
+    <model name="wall_front">
+      <static>true</static>
+      <pose>0.642963 0.036061 0.60899 0 0 0</pose>
+      <link name="link">
+        <collision name="collision_wall_front">
+          <geometry>
+            <box>
+              <size>0.01235 0.05025 0.07711</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="wall_left">
+      <static>true</static>
+      <pose>0.7147 0.06 0.609618 0 0 0</pose>
+      <link name="link">
+        <collision name="collision_wall_left">
+          <geometry>
+            <box>
+              <size>0.11107 0.009947 0.07782</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="wall_back">
+      <static>true</static>
+      <pose>0.779 0.01885 0.60897 0 0 0</pose>
+      <link name="link">
+        <collision name="collision_wall_back">
+          <geometry>
+            <box>
+              <size>0.01122 0.0689 0.07574</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <model name="sphere_goal">
+      <static>true</static>
+      <pose>0.681 -0.0289 0.63239 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <geometry>
+            <sphere>
+              <radius>0.02</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Blue</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
 
     <!-- A camera -->
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>7.23602 -2.30855 5.71687 3.18319e-17 0.511643 2.21619</pose>
+        <pose>1.238 -1.01239 1.31695 -3.30025e-17 0.571643 2.08819</pose>
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
+
+    <model name="sphere_rad_1">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.005</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_2">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.01</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_3">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.015</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_4">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.02</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_5">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.025</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_6">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.03</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_7">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.035</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_8">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.04</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_9">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.045</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_10">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.05</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_11">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.055</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_12">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.06</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_13">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.065</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_14">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.07</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_15">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.075</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_16">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.08</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_17">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.085</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_18">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.09</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_19">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.095</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+
+    <model name="sphere_rad_20">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.10</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_21">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.105</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_22">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.11</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_23">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.115</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_24">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.12</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_25">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.125</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_26">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.13</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_27">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.135</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_28">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.14</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_29">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.145</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_30">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.15</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_31">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.155</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_32">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.16</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_33">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.165</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_34">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.17</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_35">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.175</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_36">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.18</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_37">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.185</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_38">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.19</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="sphere_rad_39">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.195</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+
+    <model name="sphere_rad_40">
+      <static>true</static>
+      <pose>0 0 100 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <cast_shadows>false</cast_shadows>
+          <transparency>0.5</transparency>
+          <geometry>
+            <sphere>
+              <radius>0.20</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Green</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
 
 
 

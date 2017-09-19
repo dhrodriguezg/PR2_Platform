@@ -6,6 +6,7 @@ project(pr2_transceiver)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  roslib
   sensor_msgs
   std_srvs
   actionlib
@@ -15,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   topic_tools
+  gazebo_msgs
 )
 
 ## System dependencies are found with CMake's conventions

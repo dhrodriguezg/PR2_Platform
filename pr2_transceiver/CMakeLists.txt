@@ -118,6 +118,7 @@ add_executable(navigation_transceiver src/navigation_transceiver.cpp)
 add_executable(manipulation_transceiver src/manipulation_transceiver.cpp)
 add_executable(point_head src/point_head.cpp)
 add_executable(param_sender src/param_sender.cpp)
+add_executable(rosbag_extractor src/rosbag_extractor.cpp)
 
 add_dependencies(camera_transceiver src wam_msgs_generate_messages_cpp)
 add_dependencies(teleop_transceiver src wam_msgs_generate_messages_cpp)
@@ -125,6 +126,7 @@ add_dependencies(navigation_transceiver src wam_msgs_generate_messages_cpp)
 add_dependencies(manipulation_transceiver src wam_msgs_generate_messages_cpp)
 add_dependencies(point_head src wam_msgs_generate_messages_cpp)
 add_dependencies(param_sender src wam_msgs_generate_messages_cpp)
+add_dependencies(rosbag_extractor src wam_msgs_generate_messages_cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -137,6 +139,7 @@ target_link_libraries(navigation_transceiver ${catkin_LIBRARIES})
 target_link_libraries(manipulation_transceiver ${catkin_LIBRARIES})
 target_link_libraries(point_head ${catkin_LIBRARIES})
 target_link_libraries(param_sender ${catkin_LIBRARIES})
+target_link_libraries(rosbag_extractor ${catkin_LIBRARIES})
 
 #############
 ## Install ##

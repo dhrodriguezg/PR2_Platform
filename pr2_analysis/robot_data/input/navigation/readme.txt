@@ -1,0 +1,1 @@
+Files from RosbagExtractor must be stored here, only manipulation format: 

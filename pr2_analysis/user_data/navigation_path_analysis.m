@@ -1,3 +1,4 @@
+%plot (u_prof,y,'color',rand(1,3))
 %scenario - interface - users
 clc; clear all; close all;
 tic
@@ -46,16 +47,18 @@ for n=1:length(file_list)
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_pos_x = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_pos_x);']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_ang_z = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_ang_z);']);
         
-        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_pos_x).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_ang_z).^2 );']);
-        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rv = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_rz).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_pos_x).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_ang_z).^2 + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_rz).^2 );']);
+        %eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rv = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_rz).^2 );']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.spectralarc = SpectralArcLength( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v, Ts );']);
-        %eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rspectralarc = SpectralArcLength( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rv, Ts );']);
+        
         
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.a = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_pos_x).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_ang_z).^2 );']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ra = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_rz).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.all_a = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_pos_x).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_ang_z).^2 + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_rz).^2 );']);
         
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_a = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.a,resize_value,length(cvs_data(:,1)));']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_ra = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ra,resize_value,length(cvs_data(:,1)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_all_a = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.all_a,resize_value,length(cvs_data(:,1)));']);
         
     end
 end
@@ -66,6 +69,7 @@ for s=1:2
     for i=1:3
         eval([ 's' num2str(s) '.i' num2str(i) '.a = zeros(max_users,1);']);
         eval([ 's' num2str(s) '.i' num2str(i) '.ra = zeros(max_users,1);']);
+        eval([ 's' num2str(s) '.i' num2str(i) '.all_a = zeros(max_users,1);']);
         eval([ 's' num2str(s) '.i' num2str(i) '.spectralarc = zeros(max_users,1);']);
         eval([ 's' num2str(s) '.i' num2str(i) '.rspectralarc = zeros(max_users,1);']);
         for u=2:max_users
@@ -76,8 +80,8 @@ for s=1:2
             try
                 eval([ 's' num2str(s) '.i' num2str(i) '.a(' num2str(u) ') =  mean(s' num2str(s) '.i' num2str(i) '.u' user '.resampled_a);'])
                 eval([ 's' num2str(s) '.i' num2str(i) '.ra(' num2str(u) ') =  mean(s' num2str(s) '.i' num2str(i) '.u' user '.resampled_ra);'])
+                eval([ 's' num2str(s) '.i' num2str(i) '.all_a(' num2str(u) ') =  mean(s' num2str(s) '.i' num2str(i) '.u' user '.resampled_all_a);'])
                eval([ 's' num2str(s) '.i' num2str(i) '.spectralarc(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.spectralarc;'])
-               %eval([ 's' num2str(s) '.i' num2str(i) '.rspectralarc(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.rspectralarc;'])
             catch
             end
         end
@@ -98,19 +102,19 @@ xlswrite([output 'nav_ra_s2_i1'],s2.i1.ra);
 xlswrite([output 'nav_ra_s2_i2'],s2.i2.ra);
 xlswrite([output 'nav_ra_s2_i3'],s2.i3.ra);
 
+xlswrite([output 'nav_alla_s1_i1'],s1.i1.all_a);
+xlswrite([output 'nav_alla_s1_i2'],s1.i2.all_a);
+xlswrite([output 'nav_alla_s1_i3'],s1.i3.all_a);
+xlswrite([output 'nav_alla_s2_i1'],s2.i1.all_a);
+xlswrite([output 'nav_alla_s2_i2'],s2.i2.all_a);
+xlswrite([output 'nav_alla_s2_i3'],s2.i3.all_a);
+
 xlswrite([output 'nav_spectral_s1_i1'],s1.i1.spectralarc);
 xlswrite([output 'nav_spectral_s1_i2'],s1.i2.spectralarc);
 xlswrite([output 'nav_spectral_s1_i3'],s1.i3.spectralarc);
 xlswrite([output 'nav_spectral_s2_i1'],s2.i1.spectralarc);
 xlswrite([output 'nav_spectral_s2_i2'],s2.i2.spectralarc);
 xlswrite([output 'nav_spectral_s2_i3'],s2.i3.spectralarc);
-
-%xlswrite([output 'nav_rspectral_s1_i1'],s1.i1.rspectralarc);
-%xlswrite([output 'nav_rspectral_s1_i2'],s1.i2.rspectralarc);
-%xlswrite([output 'nav_rspectral_s1_i3'],s1.i3.rspectralarc);
-%xlswrite([output 'nav_rspectral_s3_i1'],s3.i1.rspectralarc);
-%xlswrite([output 'nav_rspectral_s3_i2'],s3.i2.rspectralarc);
-%xlswrite([output 'nav_rspectral_s3_i3'],s3.i3.rspectralarc);
 
 toc;
 

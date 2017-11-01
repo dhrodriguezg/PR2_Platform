@@ -53,7 +53,8 @@ for n=1:length(file_list)
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ay = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vy);']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d = sqrt( (cvs_data(:,6)-' file_parameters{4} '_x).^2 + (cvs_data(:,7)-' file_parameters{4} '_y).^2 );']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.davg = tsmovavg(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d, ''s'', 150, 1);']);
-        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd = abs(diff( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.davg ));']);
+        %%eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd = abs(diff( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.davg ));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd = diff( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d );']);
         
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vx).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vy).^2 );']);
         eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.spectralarc = SpectralArcLength( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v, Ts );']);

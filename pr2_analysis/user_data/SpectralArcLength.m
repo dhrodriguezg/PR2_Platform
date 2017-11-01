@@ -93,6 +93,6 @@ speedSpectrum = speedSpectrum(1:inxFc);
 % 2. Calculate the incremental arc lengths.
 dArcLengths = sqrt((1/(inxFc-1))^2 + (diff(speedSpectrum)).^2);
 % 4. Compute movement smoothness.
-S = sum(dArcLengths);
+S = -sum(dArcLengths);
 
 return;

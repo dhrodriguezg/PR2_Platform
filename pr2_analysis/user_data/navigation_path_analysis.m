@@ -4,21 +4,10 @@ tic
 folder='./input/navigation/';
 output='./output/';
 resize_value=512;
-
-scenario1 = xlsread('./input/scenario_1_ref_path.xlsx');
-scenario1_path_x=scenario1(:,1)';
-scenario1_path_y=scenario1(:,2)';
-scenario2 = xlsread('./input/scenario_2_ref_path.xlsx');
-scenario2_path_x=scenario2(:,1)';
-scenario2_path_y=scenario2(:,2)';
+Ts=1/100;
 
 file_list = dir(folder);
-max_users=26;
-
-s1_x=3;
-s1_y=-4;
-s2_x=3.7;
-s2_y=0.14;
+max_users=27;
 
 for n=1:length(file_list)
 %for n=1:3
@@ -26,124 +15,106 @@ for n=1:length(file_list)
         
         cvs_data = csvread([folder file_list(n).name],1,0);
         file_name = strsplit(file_list(n).name,'.');
-        file_parameters = strsplit( file_name{1} ,'_'); %Ex: navigation_u02_s1_i2    {2}:u02 - {3}:s1 - {4}:i2 
+        file_parameters = strsplit( file_name{1} ,'_'); %Ex: robot_navigation_u0#_s#_i#   {2}:u02 - {3}:s1 - {4}:i2 
         
         %s1.i1.max_length=
         try
-            eval([ file_parameters{3} '.' file_parameters{4} '.max_length = max([' file_parameters{3} '.' file_parameters{4} '.max_length length(cvs_data(:,6))]);']);
+            eval([ file_parameters{4} '.' file_parameters{5} '.max_length = max([' file_parameters{4} '.' file_parameters{5} '.max_length length(cvs_data(:,1))]);']);
         catch
-            eval([ file_parameters{3} '.' file_parameters{4} '.max_length = length(cvs_data(:,6));']);
+            eval([ file_parameters{4} '.' file_parameters{5} '.max_length = length(cvs_data(:,1));']);
         end
 
-        %s1.i1.u02.ABC = ... 
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.secs = cvs_data(:,1);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.secs = cvs_data(:,1);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.nsecs = cvs_data(:,2);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.user = cvs_data(:,3);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.scenario = cvs_data(:,4);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.interface = cvs_data(:,5);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x = cvs_data(:,6);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y = cvs_data(:,7);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.yaw = cvs_data(:,8);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vx = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vy = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ax = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vx);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ay = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vy);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.d = sqrt( (cvs_data(:,6)-' file_parameters{3} '_x).^2 + (cvs_data(:,7)-' file_parameters{3} '_y).^2 );']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.davg = tsmovavg(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.d, ''s'', 150, 1);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dd = abs(diff( ' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.davg ));']);
+
+        %s1.i1.u02.ABC = ... secs,camera,head_ry,head_rz,pos_x,ang_z
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.secs = cvs_data(:,1);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.camera = cvs_data(:,2);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.head_ry = cvs_data(:,3);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.head_rz = cvs_data(:,4);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.pos_x = cvs_data(:,5);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ang_z = cvs_data(:,6);']);
+
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_camera = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.camera);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_ry = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.head_ry);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_rz = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.head_rz);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_pos_x = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.pos_x);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_ang_z = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ang_z);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_x = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_y = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_d = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.d,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_davg = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.davg,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_dd = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dd,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.mean_dd = mean(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dd(150:end)) ;']);
-                
-        i=100;
-        cumulative_error=0;
-        scenario_path_x=[];
-        scenario_path_y=[];
-        eval([ 'ux = ' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x;']);
-        eval([ 'uy = ' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y;']);
-        if not( isempty(strfind(file_list(n).name,'_s1_')) )
-            scenario_path_x=scenario1_path_x;
-            scenario_path_y=scenario1_path_y;
-        else
-            scenario_path_x=scenario2_path_x;
-            scenario_path_y=scenario2_path_y;
-        end
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_camera = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_camera);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_ry = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_ry);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_rz = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_rz);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_pos_x = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_pos_x);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_ang_z = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_ang_z);']);
         
-        for m=1:length(ux)
-            current_x=ux(m);
-            current_y=uy(m);
-            path_x=scenario_path_x(i-99:i+99);
-            path_y=scenario_path_y(i-99:i+99);
-            error=sqrt((path_x-current_x).^2+(path_y-current_y).^2);
-            [min_value,index] = min(error);
-            cumulative_error = cumulative_error + min_value/length(ux);
-            n_i = i + index - 100; %true value
-            if(n_i < 100 || n_i > length(scenario_path_x) - 99 )
-                n_i=i;
-            end
-            i=n_i;
-        end
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.cumulative_error = cumulative_error;']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_pos_x).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_ang_z).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rv = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d_head_rz).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.spectralarc = SpectralArcLength( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v, Ts );']);
+        %eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rspectralarc = SpectralArcLength( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.rv, Ts );']);
+        
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.a = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_pos_x).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_ang_z).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ra = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_ry).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd_head_rz).^2 );']);
+        
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_a = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.a,resize_value,length(cvs_data(:,1)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_ra = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ra,resize_value,length(cvs_data(:,1)));']);
+        
     end
 end
 
-clear scenario1 scenario2 cvs_data file_name file_parameters ux uy scenario_path_x scenario_path_y cumulative_error i m n n_i current_x current_y error path_x path_y min_value index; 
+clear cvs_data file_name file_parameters;
 
 for s=1:2
     for i=1:3
-        eval([ 's' num2str(s) '.i' num2str(i) '.all_x = zeros(resize_value,max_users);']);
-        eval([ 's' num2str(s) '.i' num2str(i) '.all_y = zeros(resize_value,max_users);']);
-        eval([ 's' num2str(s) '.i' num2str(i) '.all_d = zeros(resize_value,max_users);']);
-        eval([ 's' num2str(s) '.i' num2str(i) '.err = zeros(max_users,1);']);
-        eval([ 's' num2str(s) '.i' num2str(i) '.mean_dd = zeros(max_users,1);']);
+        eval([ 's' num2str(s) '.i' num2str(i) '.a = zeros(max_users,1);']);
+        eval([ 's' num2str(s) '.i' num2str(i) '.ra = zeros(max_users,1);']);
+        eval([ 's' num2str(s) '.i' num2str(i) '.spectralarc = zeros(max_users,1);']);
+        eval([ 's' num2str(s) '.i' num2str(i) '.rspectralarc = zeros(max_users,1);']);
         for u=2:max_users
             user=num2str(u);
             if u<10
                 user=['0' num2str(u)];
             end
             try
-               eval([ 's' num2str(s) '.i' num2str(i) '.all_x(:,' num2str(u) ') = s' num2str(s) '.i' num2str(i) '.u' user '.resampled_x;']);
-               eval([ 's' num2str(s) '.i' num2str(i) '.all_y(:,' num2str(u) ') = s' num2str(s) '.i' num2str(i) '.u' user '.resampled_y;']);
-               eval([ 's' num2str(s) '.i' num2str(i) '.all_d(:,' num2str(u) ') = s' num2str(s) '.i' num2str(i) '.u' user '.resampled_d;']);
-               
-               eval([ 's' num2str(s) '.i' num2str(i) '.err(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.cumulative_error;'])
-               eval([ 's' num2str(s) '.i' num2str(i) '.mean_dd(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.mean_dd;'])
-               
-               eval([ 'norm_ax = zeros(s' num2str(s) '.i' num2str(i) '.max_length,1);']);
-               eval([ 'norm_ay = zeros(s' num2str(s) '.i' num2str(i) '.max_length,1);']);
-               eval([ 'norm_ax(1:length(s' num2str(s) '.i' num2str(i) '.u' user '.ax)) = s' num2str(s) '.i' num2str(i) '.u' user '.ax;']);
-               eval([ 'norm_ay(1:length(s' num2str(s) '.i' num2str(i) '.u' user '.ay)) = s' num2str(s) '.i' num2str(i) '.u' user '.ay;']);
-               eval([ 's' num2str(s) '.i' num2str(i) '.u' user '.zax = norm_ax;']);
-               eval([ 's' num2str(s) '.i' num2str(i) '.u' user '.zay = norm_ay;']);
-
+                eval([ 's' num2str(s) '.i' num2str(i) '.a(' num2str(u) ') =  mean(s' num2str(s) '.i' num2str(i) '.u' user '.resampled_a);'])
+                eval([ 's' num2str(s) '.i' num2str(i) '.ra(' num2str(u) ') =  mean(s' num2str(s) '.i' num2str(i) '.u' user '.resampled_ra);'])
+               eval([ 's' num2str(s) '.i' num2str(i) '.spectralarc(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.spectralarc;'])
+               %eval([ 's' num2str(s) '.i' num2str(i) '.rspectralarc(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.rspectralarc;'])
             catch
             end
         end
     end
 end
 
-xlswrite([output 'nav_err_ref_path_s1_i1'],s1.i1.err);
-xlswrite([output 'nav_err_ref_path_s1_i2'],s1.i2.err);
-xlswrite([output 'nav_err_ref_path_s1_i3'],s1.i3.err);
-xlswrite([output 'nav_err_ref_path_s2_i1'],s2.i1.err);
-xlswrite([output 'nav_err_ref_path_s2_i2'],s2.i2.err);
-xlswrite([output 'nav_err_ref_path_s2_i3'],s2.i3.err);
+xlswrite([output 'nav_a_s1_i1'],s1.i1.a);
+xlswrite([output 'nav_a_s1_i2'],s1.i2.a);
+xlswrite([output 'nav_a_s1_i3'],s1.i3.a);
+xlswrite([output 'nav_a_s2_i1'],s2.i1.a);
+xlswrite([output 'nav_a_s2_i2'],s2.i2.a);
+xlswrite([output 'nav_a_s2_i3'],s2.i3.a);
 
-xlswrite([output 'nav_residual_s1_i1'],s1.i1.mean_dd);
-xlswrite([output 'nav_residual_s1_i2'],s1.i2.mean_dd);
-xlswrite([output 'nav_residual_s1_i3'],s1.i3.mean_dd);
-xlswrite([output 'nav_residual_s2_i1'],s2.i1.mean_dd);
-xlswrite([output 'nav_residual_s2_i2'],s2.i2.mean_dd);
-xlswrite([output 'nav_residual_s2_i3'],s2.i3.mean_dd);
+xlswrite([output 'nav_ra_s1_i1'],s1.i1.ra);
+xlswrite([output 'nav_ra_s1_i2'],s1.i2.ra);
+xlswrite([output 'nav_ra_s1_i3'],s1.i3.ra);
+xlswrite([output 'nav_ra_s2_i1'],s2.i1.ra);
+xlswrite([output 'nav_ra_s2_i2'],s2.i2.ra);
+xlswrite([output 'nav_ra_s2_i3'],s2.i3.ra);
 
+xlswrite([output 'nav_spectral_s1_i1'],s1.i1.spectralarc);
+xlswrite([output 'nav_spectral_s1_i2'],s1.i2.spectralarc);
+xlswrite([output 'nav_spectral_s1_i3'],s1.i3.spectralarc);
+xlswrite([output 'nav_spectral_s2_i1'],s2.i1.spectralarc);
+xlswrite([output 'nav_spectral_s2_i2'],s2.i2.spectralarc);
+xlswrite([output 'nav_spectral_s2_i3'],s2.i3.spectralarc);
+
+%xlswrite([output 'nav_rspectral_s1_i1'],s1.i1.rspectralarc);
+%xlswrite([output 'nav_rspectral_s1_i2'],s1.i2.rspectralarc);
+%xlswrite([output 'nav_rspectral_s1_i3'],s1.i3.rspectralarc);
+%xlswrite([output 'nav_rspectral_s3_i1'],s3.i1.rspectralarc);
+%xlswrite([output 'nav_rspectral_s3_i2'],s3.i2.rspectralarc);
+%xlswrite([output 'nav_rspectral_s3_i3'],s3.i3.rspectralarc);
 
 toc;
+
+return;
 
 %each column is an user.....standar graphic
 Users=ones(resize_value,max_users);

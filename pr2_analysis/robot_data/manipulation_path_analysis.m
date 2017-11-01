@@ -4,6 +4,7 @@ tic
 folder='./input/manipulation/';
 output='./output/';
 resize_value=512;
+Ts=1/25;
 
 file_list = dir(folder);
 max_users=26;
@@ -32,68 +33,73 @@ for n=1:length(file_list)
         
         cvs_data = csvread([folder file_list(n).name],1,0);
         file_name = strsplit(file_list(n).name,'.');
-        file_parameters = strsplit( file_name{1} ,'_'); %Ex: navigation_u02_s1_i2    {2}:u02 - {3}:s1 - {4}:i2 
+        file_parameters = strsplit( file_name{1} ,'_'); %Ex: navigation_u02_s1_i2   robot_navigation_u0#_s#_i# {2}:u02 - {3}:s1 - {4}:i2 
         
         %s1.i1.max_length=
         try
-            eval([ file_parameters{3} '.' file_parameters{4} '.max_length = max([' file_parameters{3} '.' file_parameters{4} '.max_length length(cvs_data(:,6))]);']);
+            eval([ file_parameters{4} '.' file_parameters{5} '.max_length = max([' file_parameters{4} '.' file_parameters{5} '.max_length length(cvs_data(:,6))]);']);
         catch
-            eval([ file_parameters{3} '.' file_parameters{4} '.max_length = length(cvs_data(:,6));']);
+            eval([ file_parameters{4} '.' file_parameters{5} '.max_length = length(cvs_data(:,6));']);
         end
 
         %s1.i1.u02.ABC = ... 
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.secs = cvs_data(:,1);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.user = cvs_data(:,2);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.scenario = cvs_data(:,3);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.interface = cvs_data(:,4);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x = cvs_data(:,5)-pr2_corr_x;']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y = cvs_data(:,6)-pr2_corr_y;']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.z = cvs_data(:,7)-pr2_corr_z;']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.roll = cvs_data(:,8);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.pitch = cvs_data(:,9);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.yaw = cvs_data(:,10);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.secs = cvs_data(:,1);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.user = cvs_data(:,2);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.scenario = cvs_data(:,3);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.interface = cvs_data(:,4);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.x = cvs_data(:,5)-pr2_corr_x;']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.y = cvs_data(:,6)-pr2_corr_y;']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.z = cvs_data(:,7)-pr2_corr_z;']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.roll = cvs_data(:,8);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.pitch = cvs_data(:,9);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.yaw = cvs_data(:,10);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vx = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vy = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vz = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.z);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vroll = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.roll);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vpitch = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.pitch);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vyaw = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.yaw);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vx = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.x);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vy = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.y);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vz = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.z);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vroll = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.roll);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vpitch = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.pitch);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vyaw = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.yaw);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ax = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vx);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ay = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vy);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.az = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vz);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.aroll = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vroll);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.apitch = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vpitch);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ayaw = diff(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.vyaw);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.d = sqrt( (cvs_data(:,5)-pr2_corr_x-' file_parameters{3} '_x).^2 + (cvs_data(:,6)-pr2_corr_y-' file_parameters{3} '_y).^2 + (cvs_data(:,7)-pr2_corr_z-' file_parameters{3} '_z).^2 );']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dA = sqrt( (cvs_data(:,8)-' file_parameters{3} '_rr).^2 + (cvs_data(:,9)-' file_parameters{3} '_rp).^2 + (cvs_data(:,10)-' file_parameters{3} '_ry).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v = sqrt( (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vx).^2  + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vy).^2 + (' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vz).^2);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.spectralarc = SpectralArcLength( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.v, Ts );']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.davg = tsmovavg(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.d, ''s'', 150, 1);']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dAavg = tsmovavg(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dA, ''s'', 150, 1);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dd = abs(diff( ' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.davg ));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ddA = abs(diff( ' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dAavg ));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ax = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vx);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ay = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vy);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.az = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vz);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.aroll = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vroll);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.apitch = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vpitch);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ayaw = diff(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.vyaw);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_x = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.x,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_y = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_z = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.y,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d = sqrt( (cvs_data(:,5)-pr2_corr_x-' file_parameters{4} '_x).^2 + (cvs_data(:,6)-pr2_corr_y-' file_parameters{4} '_y).^2 + (cvs_data(:,7)-pr2_corr_z-' file_parameters{4} '_z).^2 );']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dA = sqrt( (cvs_data(:,8)-' file_parameters{4} '_rr).^2 + (cvs_data(:,9)-' file_parameters{4} '_rp).^2 + (cvs_data(:,10)-' file_parameters{4} '_ry).^2 );']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_roll = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.roll,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_pitch = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.pitch,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_yaw = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.yaw,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.davg = tsmovavg(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d, ''s'', 150, 1);']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dAavg = tsmovavg(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dA, ''s'', 150, 1);']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_d = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.d,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_davg = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.davg,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_dd = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dd,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd = abs(diff( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.davg ));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ddA = abs(diff( ' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dAavg ));']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_dA = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dA,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_dAavg = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dAavg,resize_value,length(cvs_data(:,6)));']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.resampled_ddA = resample(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ddA,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_x = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.x,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_y = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.y,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_z = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.y,resize_value,length(cvs_data(:,6)));']);
         
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.mean_dd = mean(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.dd(150:end)) ;']);
-        eval([ file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.mean_ddA = mean(' file_parameters{3} '.' file_parameters{4} '.' file_parameters{2} '.ddA(150:end)) ;']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_roll = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.roll,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_pitch = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.pitch,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_yaw = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.yaw,resize_value,length(cvs_data(:,6)));']);
+        
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_d = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.d,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_davg = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.davg,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_dd = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd,resize_value,length(cvs_data(:,6)));']);
+        
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_dA = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dA,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_dAavg = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dAavg,resize_value,length(cvs_data(:,6)));']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.resampled_ddA = resample(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ddA,resize_value,length(cvs_data(:,6)));']);
+        
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.mean_dd = mean(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.dd(150:end)) ;']);
+        eval([ file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.mean_ddA = mean(' file_parameters{4} '.' file_parameters{5} '.' file_parameters{3} '.ddA(150:end)) ;']);
                 
     end
 end
@@ -115,6 +121,7 @@ for s=1:3
         eval([ 's' num2str(s) '.i' num2str(i) '.all_d = zeros(resize_value,max_users);']);
         eval([ 's' num2str(s) '.i' num2str(i) '.all_dA = zeros(resize_value,max_users);']);
         
+        eval([ 's' num2str(s) '.i' num2str(i) '.spectralarc = zeros(max_users,1);']);
         eval([ 's' num2str(s) '.i' num2str(i) '.mean_dd = zeros(max_users,1);']);
         eval([ 's' num2str(s) '.i' num2str(i) '.mean_ddA = zeros(max_users,1);']);
         for u=2:max_users
@@ -132,6 +139,7 @@ for s=1:3
                eval([ 's' num2str(s) '.i' num2str(i) '.all_yaw(:,' num2str(u) ') = s' num2str(s) '.i' num2str(i) '.u' user '.resampled_yaw;']);
                eval([ 's' num2str(s) '.i' num2str(i) '.all_dA(:,' num2str(u) ') = s' num2str(s) '.i' num2str(i) '.u' user '.resampled_d;']);
                
+               eval([ 's' num2str(s) '.i' num2str(i) '.spectralarc(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.spectralarc;'])
                eval([ 's' num2str(s) '.i' num2str(i) '.mean_dd(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.mean_dd;'])
                eval([ 's' num2str(s) '.i' num2str(i) '.mean_ddA(' num2str(u) ') =  s' num2str(s) '.i' num2str(i) '.u' user '.mean_ddA;'])
                
@@ -177,6 +185,13 @@ xlswrite([output 'man_angle_residual_s1_i3'],s1.i3.mean_ddA);
 xlswrite([output 'man_angle_residual_s3_i1'],s3.i1.mean_ddA);
 xlswrite([output 'man_angle_residual_s3_i2'],s3.i2.mean_ddA);
 xlswrite([output 'man_angle_residual_s3_i3'],s3.i3.mean_ddA);
+
+xlswrite([output 'man_spectral_s1_i1'],s1.i1.spectralarc);
+xlswrite([output 'man_spectral_s1_i2'],s1.i2.spectralarc);
+xlswrite([output 'man_spectral_s1_i3'],s1.i3.spectralarc);
+xlswrite([output 'man_spectral_s3_i1'],s3.i1.spectralarc);
+xlswrite([output 'man_spectral_s3_i2'],s3.i2.spectralarc);
+xlswrite([output 'man_spectral_s3_i3'],s3.i3.spectralarc);
 
 toc;
 

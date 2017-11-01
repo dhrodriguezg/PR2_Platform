@@ -1,1 +1,1 @@
-Files from RosbagExtractor must be stored here, only manipulation format: 
+Files from RosbagExtractor must be stored here, only manipulation format: robot_navigation_u0#_s#_i#

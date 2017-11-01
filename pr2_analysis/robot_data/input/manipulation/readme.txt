@@ -1,0 +1,1 @@
+Files from RosbagExtractor must be stored here, only manipulation format: robot_manipulation_u0#_s#_i#
